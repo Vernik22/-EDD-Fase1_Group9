@@ -13,7 +13,8 @@ class Grafico:
         self.ventana = Tk()
         self.ventana.geometry("1000x600")
         self.ventana.title(" [EDD] Fase-1" )
-        self.ventana.configure(bg = '#F5A903')
+        self.ventana.configure(bg='#2C3E50')
+        #self.ventana.configure(bg = '#F5A903')
 
         self.menu = Menu(self.ventana)
 
@@ -31,17 +32,9 @@ class Grafico:
         self.txtEntrada.place(x=42, y=30)
         self.labelEntrada.place(x=20, y=1)
 
-        self.txtFilas.place(x=12, y= 30, width= 25 , height=293)
-        self.txtConsola = scrolledtext.ScrolledText(self.ventana, width=70,height=10)
-        self.txtConsola.place(x=12, y=390)
-        self.labelConsola.place(x=12, y=370 )
 
         self.analiButton = Button(self.ventana, text= 'Analizar', padx= 25, pady=12, bg= 'grey',fg='white',command = self.ven2)
         self.analiButton.place(x=455, y=335)
-
-        self.combo = ttk.Combobox(self.ventana,state="readonly",values= ["Elegir Lenguaje","Css","Js", "Html", "Rtm"] )
-        self.combo.current(0)
-        self.combo.place(x=455 ,y=3)
 
 
         self.ventana.mainloop()
@@ -54,6 +47,6 @@ class tablas:
         self.ventana = Tk()
         self.ventana.geometry("1000x600")
         self.ventana.title(" [EDD] Fase-1" )
-        self.ventana.configure(bg = '#F5A903')
+        self.ventana.configure(bg = '#2C3E50')
 
         self.ventana.mainloop()
