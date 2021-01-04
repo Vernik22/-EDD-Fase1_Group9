@@ -10,7 +10,21 @@ from storage import serealizar
 
 
 
-
+def actualMod(mode):
+    if mode == 'avl':
+        return avl
+    elif mode == 'b':
+        return b
+    elif mode == 'bplus':
+        return bplus
+    elif mode == 'dict':
+        return dict
+    elif mode == 'isam':
+        return isam
+    elif mode == 'json':
+        return json
+    elif mode == 'hash':
+        return hash
 
 
 
