@@ -3,6 +3,7 @@
 *.jpg
 *.CSV
 venv/
+Data/
 __pycache__/
 .idea/
 *.db
