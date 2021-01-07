@@ -3,23 +3,24 @@
 # Copyright (c) 2020 TytusDb Team
 
 
-from storage import Tabla, serealizar
-import os, re
+import os
+import re
+
+from storage.hash import Tabla, serealizar
 
 table_name_pattern = "^[a-zA-Z_][a-zA-Z0-9#@$_]*"
 
 
 class BaseDatos:
-    
+
     def __init__(self, Name, main_path):
         self.Name = Name
         self.list_table = []
         self.main_path = main_path
         self.tabla_actual = None
         for tabla in os.listdir(self.main_path):
-            temp = tabla.replace(".bin","")
+            temp = tabla.replace(".bin", "")
             self.list_table.append(temp)
-
 
     # == BUSCAR TABLA
     def Buscar(self, table):
@@ -28,11 +29,11 @@ class BaseDatos:
         for tabla in self.list_table:
             if tabla.casefold() == table.casefold():
                 existe = True
-                i=self.list_table.index(tabla)
+                i = self.list_table.index(tabla)
                 break
             else:
                 existe = False
-            
+
         salida = [existe, i]
         return salida
 
@@ -40,11 +41,10 @@ class BaseDatos:
     def Guardar(self):
         serealizar.commit(self.tabla_actual, self.tabla_actual.nombre, self.main_path)
 
-
     def Cargar(self, table):
         try:
 
-            if self.tabla_actual.nombre.casefold()==table.casefold():
+            if self.tabla_actual.nombre.casefold() == table.casefold():
                 return self.tabla_actual
             elif table in self.list_table:
                 self.tabla_actual = serealizar.rollback(table, self.main_path)
@@ -53,7 +53,7 @@ class BaseDatos:
                 return False
 
         except:
-            
+
             if table in self.list_table:
                 self.tabla_actual = serealizar.rollback(table, self.main_path)
                 return self.tabla_actual
@@ -86,25 +86,25 @@ class BaseDatos:
         salida = self.Buscar(table)
         if salida[0]:
             try:
-                tabla = self.Cargar(table)    
+                tabla = self.Cargar(table)
                 return tabla.extractTable()
             except:
                 return None
         else:
             return None
-    
+
     # === EXTRA Y DEVUELVE LISTA DE ELEMENTOS DE UN RANGO ESPECIFICO 
     def extractRangeTable(self, table, columnNumber, lower, upper):
         salida = self.Buscar(table)
         if salida[0]:
             try:
-                tabla = self.Cargar(table)    
+                tabla = self.Cargar(table)
                 return tabla.extractRangeTable(columnNumber, lower, upper)
             except:
                 return 1
         else:
             return None
-  
+
     # == LLAVES PRIMARIAS Y FORÁNEAS    
     def alterAddPK(self, table, columns):
         salida = self.Buscar(table)
@@ -112,8 +112,8 @@ class BaseDatos:
             try:
                 if len(columns) == 0:
                     return 1
-                else:    
-                    temp = self.Cargar(table)                    
+                else:
+                    temp = self.Cargar(table)
                     var = temp.alterAddPK(columns)
                     self.Guardar()
                     return var
@@ -126,26 +126,27 @@ class BaseDatos:
         salida = self.Buscar(table)
         if salida[0]:
             try:
-                temp = self.Cargar(table)                    
+                temp = self.Cargar(table)
                 var = temp.alterDropPK()
                 self.Guardar()
                 return var
             except:
                 return 1
-        else: 
-           return 3    
+        else:
+            return 3
 
-    # == CAMBIAR NOMBRES
+            # == CAMBIAR NOMBRES
+
     def alterTable(self, tableOld, tableNew):
         salida = self.Buscar(tableOld)
         if salida[0]:
             try:
                 temp = serealizar.rollback(tableOld, self.main_path)
                 comprobar = self.Buscar(tableNew)
-                if comprobar[0] == False:                    
+                if not comprobar[0]:
                     if re.search(table_name_pattern, tableOld) and re.search(table_name_pattern, tableNew):
-                        os.remove(self.main_path+"\\"+tableOld+".bin")
-                        self.list_table[salida[1]]= tableNew
+                        os.remove(self.main_path + "\\" + tableOld + ".bin")
+                        self.list_table[salida[1]] = tableNew
                         temp.alterTable(tableNew)
                         serealizar.commit(temp, tableNew, self.main_path)
                         return 0
@@ -158,14 +159,13 @@ class BaseDatos:
                 return 1
         else:
             return 3
-    
 
-# === AGREGAR N-ESIMA COLUMNA
+    # === AGREGAR N-ESIMA COLUMNA
     def alterAddColumn(self, table, default):
         salida = self.Buscar(table)
         if salida[0]:
             try:
-                temp = self.Cargar(table)                    
+                temp = self.Cargar(table)
                 var = temp.alterAddColumn(default)
                 self.Guardar()
                 return var
@@ -179,7 +179,7 @@ class BaseDatos:
         salida = self.Buscar(table)
         if salida[0]:
             try:
-                temp = self.Cargar(table)                    
+                temp = self.Cargar(table)
                 var = temp.alterDropColumn(columnNumber)
                 self.Guardar()
                 return var
@@ -189,19 +189,18 @@ class BaseDatos:
             return 3
 
     # === ELIMINAR TABLA
-    def dropTable(self,tableName):
+    def dropTable(self, tableName):
         salida = self.Buscar(tableName)
         if salida[0]:
             try:
                 self.list_table.pop(salida[1])
-                os.remove(self.main_path+"\\"+tableName+".bin")
+                os.remove(self.main_path + "\\" + tableName + ".bin")
                 return 0
             except:
                 return 1
         else:
             return 3
 
-    
     # === GRAFICAR LAS TABLAS QUE CONTIENE LA BD
     def graficar(self):
         file = open('tablas.dot', "w")
@@ -211,11 +210,11 @@ class BaseDatos:
         j = 0
         for i in self.list_table:
             if j == 0:
-                info += i+ os.linesep
+                info += i + os.linesep
             else:
-                info += "|"+i+ os.linesep
-            j = j+1
-        file.write('tabla[shape=record label="'+info+'}"];')
+                info += "|" + i + os.linesep
+            j = j + 1
+        file.write('tabla[shape=record label="' + info + '}"];')
         file.write(' }' + os.linesep)
         file.close()
         os.system('dot -Tpng tablas.dot -o tablas.png')

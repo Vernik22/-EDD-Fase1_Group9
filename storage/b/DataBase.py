@@ -2,9 +2,10 @@
 # License:  Released under MIT License
 # Notice:   Copyright (c) 2020 TytusDB Team
 
-from team17 import Estructura_ArbolB as bt
-from team17 import Serializable as serializar
+from storage.b import Estructura_ArbolB as bt
+from storage.b import Serializable as serializar
 import csv
+
 
 class DB():
     def __init__(self):
@@ -13,7 +14,7 @@ class DB():
         self.cont = 0
         self.grade = 5
 
-    #---------------------FUNCIONES BASES DE DATOS----------------------#
+    # ---------------------FUNCIONES BASES DE DATOS----------------------#
 
     # CREAR BASE DE DATOS
 
@@ -111,7 +112,7 @@ class DB():
             return None
         return None
 
-    #LISTA REGISTROS EN UN RANGO DE UNA TABLA
+    # LISTA REGISTROS EN UN RANGO DE UNA TABLA
 
     def extractRangeTable(self, database, table, columnNumber, lower, upper):
         try:
@@ -122,7 +123,8 @@ class DB():
                             registros = list()
                             for tupla in self.extractTable(database, table):
                                 if str(tupla[columnNumber]).isdigit() and str(lower).isdigit() and str(upper).isdigit():
-                                    if int(tupla[columnNumber]) >= int(lower) and int(tupla[columnNumber]) <= int(upper):
+                                    if int(tupla[columnNumber]) >= int(lower) and int(tupla[columnNumber]) <= int(
+                                            upper):
                                         registros.append(tupla)
                                 elif str(tupla[columnNumber]) >= str(lower) and str(tupla[columnNumber]) <= str(upper):
                                     registros.append(tupla)
@@ -156,7 +158,7 @@ class DB():
                             if self.verifyPk(database, table, columns):
                                 self.dicDB[database][table][2] = columns
                                 self.updateTree(database, table)
-                                serializar.commit(self.dicDB[database][table][0], database+"-"+table+"-B")
+                                serializar.commit(self.dicDB[database][table][0], database + "-" + table + "-B")
                                 return 0
                             return 4
                         return 4
@@ -171,7 +173,7 @@ class DB():
     def alterDropPK(self, database, table):
         try:
             if self.searchDB(database):
-                if self.searchTB(database,table):
+                if self.searchTB(database, table):
                     if self.dicDB[database][table][2]:
                         self.dicDB[database][table][2] = None
                         return 0
@@ -205,14 +207,14 @@ class DB():
 
     # AGREGAR UN NUEVO REGISTRO A LAS TABLAS EXISTENTES
 
-    def alterAddColumn(self, database,  table, default):
+    def alterAddColumn(self, database, table, default):
         if self.identify(database) and self.identify(table):
             if self.searchDB(database):
                 if self.searchTB(database, table):
                     try:
                         self.dicDB[database][table][1] += 1
                         self.dicDB[database][table][0].agregarValor(default)
-                        serializar.commit(self.dicDB[database][table][0], database+"-"+table+"-B")
+                        serializar.commit(self.dicDB[database][table][0], database + "-" + table + "-B")
                         return 0
                     except:
                         return 1
@@ -238,15 +240,15 @@ class DB():
                                         if i < columnNumber:
                                             pk.append(i)
                                         else:
-                                            pk.append(i-1)
+                                            pk.append(i - 1)
                                     self.dicDB[database][table][2] = pk
-                                    serializar.commit(self.dicDB[database][table][0], database+"-"+table+"-B")
+                                    serializar.commit(self.dicDB[database][table][0], database + "-" + table + "-B")
                                     return 0
                                 return 4
                             else:
                                 self.dicDB[database][table][1] -= 1
                                 self.dicDB[database][table][0].eliminarValor(columnNumber)
-                                serializar.commit(self.dicDB[database][table][0], database+"-"+table+"-B")
+                                serializar.commit(self.dicDB[database][table][0], database + "-" + table + "-B")
                                 return 0
                         except:
                             return 1
@@ -317,9 +319,9 @@ class DB():
         try:
             tmp = list()
             with open(file, 'r') as file:
-                reader = csv.reader(file, delimiter = ',')
+                reader = csv.reader(file, delimiter=',')
                 for registros in reader:
-                    tmp.append(self.insert(database,table, registros))
+                    tmp.append(self.insert(database, table, registros))
                 return tmp
         except:
             return []
@@ -356,7 +358,7 @@ class DB():
                             for key, value in register.items():
                                 tupla[key] = value
                             self.dicDB[database][table][0].update(tupla, pk)
-                            self.updateTree(database,table)
+                            self.updateTree(database, table)
                             serializar.commit(self.dicDB[database][table][0], database + "-" + table + "-B")
                             return 0
                         return 4
@@ -432,7 +434,7 @@ class DB():
         except:
             return 1
 
-    #-------------------------UTILIDADES-------------------------#
+    # -------------------------UTILIDADES-------------------------#
 
     # VALIDA EL NOMBRE CON LAS REGLAS DE IDENTIFICADORES DE SQL
 
@@ -455,7 +457,7 @@ class DB():
 
     # BUSCAR SI EXISTE LA TABLA EN UNA DETERMINADA BASE DE DATOS
 
-    def searchTB(self, database,table):
+    def searchTB(self, database, table):
         for i in self.dicDB[database]:
             if table.lower() == i.lower():
                 return True
@@ -484,7 +486,7 @@ class DB():
             pk = pk[:-1]
             tmp.insertar([pk, i])
         self.dicDB[database][table][0] = tmp
-    
+
     # VERIFICAR SI NO HAY CONFLICTO ENTRE PK
 
     def verifyPk(self, database, table, columns):

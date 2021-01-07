@@ -3,11 +3,14 @@
 # Copyright (c) 2020 TytusDb Team
 
 
-from storage import ListaBaseDatos, serealizar
-import os, re, csv
+import csv
+import os
+import re
+
+from storage.hash import ListaBaseDatos
 
 _storage = ListaBaseDatos.ListaBaseDatos()
-_main_path = os.getcwd()+"\\data\\hash"
+_main_path = os.getcwd() + "\\data\\hash"
 _db_name_pattern = "^[a-zA-Z][a-zA-Z0-9#@$_]*"
 
 
@@ -23,7 +26,7 @@ def setDir(path: str) -> int:
     """
 
     global _main_path
-    temp_path = path+"\\data"
+    temp_path = path + "\\data"
 
     try:
         if os.path.isdir(path):
@@ -37,7 +40,7 @@ def setDir(path: str) -> int:
             __init__()
 
             return 0
-        
+
         else:
             return 1
 
@@ -48,17 +51,18 @@ def setDir(path: str) -> int:
 # ==//== inicialización del sistema de directorios ==//==
 
 def __init__():
+    if not os.path.isdir(os.getcwd() + "\\data"):
+        os.mkdir(os.getcwd() + "\\data")
 
-    if not os.path.isdir(os.getcwd()+"\\data"):
-        os.mkdir(os.getcwd()+"\\data")
+    if not os.path.isdir(os.getcwd() + "\\data\\hash"):
+        os.mkdir(os.getcwd() + "\\data\\hash")
 
-    if not os.path.isdir(os.getcwd()+"\\data\\hash"):
-        os.mkdir(os.getcwd()+"\\data\\hash")
-        
     for db in os.listdir(_main_path):
         _storage.createDatabase(db)
-        
+
+
 __init__()
+
 
 # ==//== funciones con respecto a ListaBaseDatos ==//==
 # Se llama la función sobre la clase ListaBaseDatos
@@ -76,7 +80,7 @@ def createDatabase(database: str) -> int:
     """
 
     try:
-        
+
         if re.search(_db_name_pattern, database):
             return _storage.createDatabase(database)
 
@@ -110,7 +114,7 @@ def alterDatabase(databaseOld: str, databaseNew: str) -> int:
             2: non-existent target database
             3: new database name occupied
     """
-    
+
     try:
 
         if re.search(_db_name_pattern, databaseOld) and re.search(_db_name_pattern, databaseNew):
@@ -118,7 +122,7 @@ def alterDatabase(databaseOld: str, databaseNew: str) -> int:
 
         else:
             return 1
-            
+
     except:
         return 1
 
@@ -138,7 +142,7 @@ def dropDatabase(database: str) -> int:
     try:
 
         return _storage.dropDatabase(database)
-    
+
     except:
         return 1
 
@@ -216,7 +220,7 @@ def extractTable(database: str, table: str) -> list:
 
         else:
             return None
-            
+
     except:
         return None
 
@@ -245,7 +249,7 @@ def extractRangeTable(database: str, table: str, columnNumber: int, lower: any, 
 
         else:
             return None
-            
+
     except:
         return None
 
@@ -302,10 +306,10 @@ def alterDropPK(database: str, table: str) -> int:
 
         if temp:
             return temp.alterDropPK(table)
-            
+
         else:
             return 2
-            
+
     except:
         return 1
 
@@ -351,12 +355,12 @@ def alterTable(database: str, tableOld: str, tableNew: str) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1
 
 
-def alterAddColumn(database:str, table:str, default: any) -> int:
+def alterAddColumn(database: str, table: str, default: any) -> int:
     """Appends a column to a table in a database
 
         Parameters:\n
@@ -380,7 +384,7 @@ def alterAddColumn(database:str, table:str, default: any) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1
 
@@ -411,7 +415,7 @@ def alterDropColumn(database: str, table: str, columnNumber: int) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1
 
@@ -439,7 +443,7 @@ def dropTable(database: str, table: str) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1
 
@@ -470,11 +474,11 @@ def insert(database: str, table: str, register: list) -> int:
 
         if temp:
 
-            b = temp.Buscar(table)        
-            
+            b = temp.Buscar(table)
+
             if b[0]:
                 tabla = temp.Cargar(table)
-                var = tabla.insertar(register)            
+                var = tabla.insertar(register)
                 temp.Guardar()
                 return var
 
@@ -483,7 +487,7 @@ def insert(database: str, table: str, register: list) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1
 
@@ -501,7 +505,7 @@ def loadCSV(file: str, database: str, table: str) -> list:
             list: return values of each insert
             empty list: non-existent database, non-existent table, an error occured, csv file is empty
     """
-    
+
     try:
 
         archivo = open(file, "r", encoding="utf-8-sig")
@@ -509,23 +513,23 @@ def loadCSV(file: str, database: str, table: str) -> list:
         temp = _storage.Buscar(database)
 
         if temp:
-            
-            b = temp.Buscar(table)        
-            nombre = temp.list_table[b[1]]
-            
-            if b[0]:
-                
-                tabla = temp.Cargar(nombre)
-                registros = list(csv.reader(archivo, delimiter = ","))
 
-                valores=[]     
-                for registro in registros:     
+            b = temp.Buscar(table)
+            nombre = temp.list_table[b[1]]
+
+            if b[0]:
+
+                tabla = temp.Cargar(nombre)
+                registros = list(csv.reader(archivo, delimiter=","))
+
+                valores = []
+                for registro in registros:
 
                     for i in range(len(registro)):
 
                         if registro[i].isnumeric():
-                            nuevo=int(registro[i])
-                            registro[i]=nuevo
+                            nuevo = int(registro[i])
+                            registro[i] = nuevo
 
                     valores.append(tabla.insertar(registro))
 
@@ -538,10 +542,10 @@ def loadCSV(file: str, database: str, table: str) -> list:
 
         else:
             return []
-            
+
     except:
         return []
-        
+
 
 def extractRow(database: str, table: str, columns: list) -> list:
     """Shows a register of a table in a database
@@ -562,11 +566,11 @@ def extractRow(database: str, table: str, columns: list) -> list:
 
         if temp:
 
-            b = temp.Buscar(table)       
-            
+            b = temp.Buscar(table)
+
             if b[0]:
                 tabla = temp.Cargar(table)
-                var = tabla.ExtraerTupla(columns)            
+                var = tabla.ExtraerTupla(columns)
                 temp.Guardar()
                 return var
 
@@ -575,7 +579,7 @@ def extractRow(database: str, table: str, columns: list) -> list:
 
         else:
             return []
-            
+
     except:
         return []
 
@@ -607,7 +611,7 @@ def update(database: str, table: str, register: dict, columns: list) -> int:
 
             if b[0]:
                 tabla = temp.Cargar(table)
-                var = tabla.update(columns, register)            
+                var = tabla.update(columns, register)
                 temp.Guardar()
                 return var
 
@@ -616,7 +620,7 @@ def update(database: str, table: str, register: dict, columns: list) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1
 
@@ -643,11 +647,11 @@ def delete(database: str, table: str, columns: list) -> int:
 
         if temp:
 
-            b = temp.Buscar(table)        
+            b = temp.Buscar(table)
 
             if b[0]:
                 tabla = temp.Cargar(table)
-                var = tabla.deleteTable(columns)            
+                var = tabla.deleteTable(columns)
                 temp.Guardar()
                 return var
 
@@ -656,7 +660,7 @@ def delete(database: str, table: str, columns: list) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1
 
@@ -685,7 +689,7 @@ def truncate(database: str, table: str) -> int:
 
             if b[0]:
                 tabla = temp.Cargar(table)
-                var = tabla.truncate()            
+                var = tabla.truncate()
                 temp.Guardar()
                 return var
 
@@ -694,6 +698,6 @@ def truncate(database: str, table: str) -> int:
 
         else:
             return 2
-            
+
     except:
         return 1

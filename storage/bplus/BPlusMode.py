@@ -2,11 +2,11 @@
 # Released under MIT License
 # Copyright (c) 2020 TytusDb Team
 
-from team18 import AVLTree
-from team18 import BplusTree
+from storage.bplus import AVLTree
+from storage.bplus import BplusTree
 import os
 import pickle
-from team18 import Serializable as serializable
+from storage.bplus import Serializable as serializable
 import re
 import shutil
 
@@ -32,7 +32,7 @@ def validateIdentifier(identifier):
 
 
 def createDatabase(database):
-    if type(database) !=str:
+    if type(database) != str:
         return 1
     checkData()
     if database and validateIdentifier(database):
@@ -58,7 +58,7 @@ def showDatabases():
 
 
 def alterDatabase(dataBaseOld, dataBaseNew) -> int:
-    if type(dataBaseOld) !=str or type(dataBaseNew)!=str:
+    if type(dataBaseOld) != str or type(dataBaseNew) != str:
         return 1
     checkData()
     if validateIdentifier(dataBaseOld) and validateIdentifier(dataBaseNew):
@@ -77,8 +77,9 @@ def alterDatabase(dataBaseOld, dataBaseNew) -> int:
     else:
         return 1
 
+
 def dropDatabase(database):
-    if type(database) !=str:
+    if type(database) != str:
         return 1
     checkData()
     if validateIdentifier(database):
@@ -92,12 +93,13 @@ def dropDatabase(database):
         return 0
     else:
         return 1
-    
+
+
 # ---------------CRUD TABLE----------------#
 # ----------------Erick--------------------#
 
 def createTable(database, table, numberColumns):
-    if type(database) !=str or type(table)!=str or type(numberColumns)!=int:
+    if type(database) != str or type(table) != str or type(numberColumns) != int:
         return 1
     # Validates identifier before searching
     if validateIdentifier(database) and validateIdentifier(table) and numberColumns > 0:
@@ -125,7 +127,7 @@ def createTable(database, table, numberColumns):
 
 
 def showTables(database):
-    if type(database) !=str:
+    if type(database) != str:
         return 1
     checkData()
     if validateIdentifier(database):
@@ -141,7 +143,7 @@ def showTables(database):
 
 
 def extractTable(database, table):
-    if type(database) !=str or type(table)!=str:
+    if type(database) != str or type(table) != str:
         return None
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -164,7 +166,7 @@ def extractTable(database, table):
 
 
 def extractRangeTable(database, table, columnNumber, lower, upper):
-    if type(database) !=str or type(table)!=str or type(columnNumber)!=int:
+    if type(database) != str or type(table) != str or type(columnNumber) != int:
         return None
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -212,7 +214,7 @@ def extractRangeTable(database, table, columnNumber, lower, upper):
 
 def alterAddPK(database: str, table: str, columns: list) -> int:
     try:
-        if type(database)!=str or type(table)!=str or type(columns)!=list:
+        if type(database) != str or type(table) != str or type(columns) != list:
             return 1
         checkData()
         # Get the databases tree
@@ -246,7 +248,7 @@ def alterAddPK(database: str, table: str, columns: list) -> int:
 
 def alterDropPK(database: str, table: str) -> int:
     try:
-        if type(database)!=str or type(table)!=str:
+        if type(database) != str or type(table) != str:
             return 1
         checkData()
         if validateIdentifier(database) and validateIdentifier(table):
@@ -269,37 +271,40 @@ def alterDropPK(database: str, table: str) -> int:
             return 1
     except:
         return 1
+
+
 # def alterAddFK(database: str, table: str, references: dict) -> int:
 # def alterAddIndex(database: str, table: str, references: dict) -> int:  
 
- 
+
 def alterTable(database: str, tableOld: str, tableNew: str) -> int:
-    if type(database) !=str or type(tableOld)!=str or type(tableNew)!=str:
+    if type(database) != str or type(tableOld) != str or type(tableNew) != str:
         return 1
     checkData()
     if validateIdentifier(tableOld) and validateIdentifier(tableNew):
         dataBaseTree = serializable.Read('./Data/BPlusMode/', "Databases")
         databaseNode = dataBaseTree.search(dataBaseTree.getRoot(), database)
         if databaseNode:
-                tablesTree = serializable.Read(f"./Data/BPlusMode/{database}/", database)
-                rootT = tablesTree.getRoot()
-                if not tablesTree.search(rootT, tableOld):
-                    return 3 #tableOLD no existente
-                elif tablesTree.search(rootT, tableNew):
-                    return 4 #tableNEW existente
-                tablesTree.delete(rootT, tableOld)
-                serializable.Rename(f'./Data/BPlusMode/{database}/', tableOld, tableNew)
-                tablesTree.add(tablesTree.getRoot(), tableNew)
-                serializable.update(f"./Data/BPlusMode/{database}/", database, tablesTree)
-                return 0
+            tablesTree = serializable.Read(f"./Data/BPlusMode/{database}/", database)
+            rootT = tablesTree.getRoot()
+            if not tablesTree.search(rootT, tableOld):
+                return 3  # tableOLD no existente
+            elif tablesTree.search(rootT, tableNew):
+                return 4  # tableNEW existente
+            tablesTree.delete(rootT, tableOld)
+            serializable.Rename(f'./Data/BPlusMode/{database}/', tableOld, tableNew)
+            tablesTree.add(tablesTree.getRoot(), tableNew)
+            serializable.update(f"./Data/BPlusMode/{database}/", database, tablesTree)
+            return 0
         else:
-            return 2 #db no existente
+            return 2  # db no existente
     else:
         return 1
-    
-def alterAddColumn(database: str, table: str, default: any) -> int:   
+
+
+def alterAddColumn(database: str, table: str, default: any) -> int:
     try:
-        if type(database)!=str or type(table)!=str:
+        if type(database) != str or type(table) != str:
             return 1
         checkData()
         if validateIdentifier(database) and validateIdentifier(table):
@@ -327,9 +332,10 @@ def alterAddColumn(database: str, table: str, default: any) -> int:
     except:
         return 1
 
+
 def alterDropColumn(database: str, table: str, columnNumber: int) -> int:
     try:
-        if type(database)!=str or type(table)!=str or type(columnNumber)!=int:
+        if type(database) != str or type(table) != str or type(columnNumber) != int:
             return 1
         checkData()
         if validateIdentifier(database) and validateIdentifier(table):
@@ -345,7 +351,7 @@ def alterDropColumn(database: str, table: str, columnNumber: int) -> int:
                 else:
                     tuplaTree = serializable.Read(f"./Data/BPlusMode/{database}/{table}/", table)
                     if columnNumber < 0 or columnNumber >= tuplaTree.columns:
-                        return 5 #out of limit
+                        return 5  # out of limit
                     else:
                         res = tuplaTree.dropColumn(columnNumber)
                         if res:
@@ -360,9 +366,10 @@ def alterDropColumn(database: str, table: str, columnNumber: int) -> int:
     except:
         return 1
 
+
 def dropTable(database: str, table: str) -> int:
     try:
-        if type(database)!=str or type(table)!=str:
+        if type(database) != str or type(table) != str:
             return 1
         checkData()
         # Get the databases tree
@@ -373,11 +380,11 @@ def dropTable(database: str, table: str) -> int:
             tablesTree = serializable.Read(f"./Data/BPlusMode/{database}/", database)
             root = tablesTree.getRoot()
             if not tablesTree.search(root, table):
-                return 3 #table no existente
+                return 3  # table no existente
             else:
                 tablesTree.delete(root, table)
                 serializable.delete(f"./Data/BPlusMode/{database}/{table}")
-                
+
                 serializable.update(f"./Data/BPlusMode/{database}/", database, tablesTree)
                 return 0
         else:
@@ -385,14 +392,16 @@ def dropTable(database: str, table: str) -> int:
     except:
         return 1
 
+
 # ---------------CRUD TUPLA----------------#
 # ---------------Rudy----------------------#
 def dropAll():
     if os.path.isdir('./Data/BPlusMode'):
         shutil.rmtree('./Data/BPlusMode')
 
+
 def insert(database, table, register):
-    if type(database) !=str or type(table)!=str or type(register)!=list:
+    if type(database) != str or type(table) != str or type(register) != list:
         return 1
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -413,8 +422,9 @@ def insert(database, table, register):
     else:
         return 1
 
+
 def loadCSV(filepath, database, table):
-    if type(database) !=str or type(table)!=str or type(filepath)!=str:
+    if type(database) != str or type(table) != str or type(filepath) != str:
         return []
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -440,8 +450,9 @@ def loadCSV(filepath, database, table):
     else:
         return []
 
+
 def extractRow(database, table, columns):
-    if type(database) !=str or type(table)!=str or type(columns)!=list:
+    if type(database) != str or type(table) != str or type(columns) != list:
         return []
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -458,8 +469,9 @@ def extractRow(database, table, columns):
     else:
         return []
 
+
 def update(database, table, register, columns):
-    if type(database) !=str or type(table)!=str or type(register)!=dict or type(columns)!=list:
+    if type(database) != str or type(table) != str or type(register) != dict or type(columns) != list:
         return 1
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -481,8 +493,9 @@ def update(database, table, register, columns):
     else:
         return 1
 
+
 def delete(database, table, columns):
-    if type(database) !=str or type(table)!=str or type(columns)!=list:
+    if type(database) != str or type(table) != str or type(columns) != list:
         return 1
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -507,8 +520,9 @@ def delete(database, table, columns):
     else:
         return 1
 
+
 def truncate(database, table):
-    if type(database) !=str or type(table)!=str:
+    if type(database) != str or type(table) != str:
         return 1
     checkData()
     if validateIdentifier(database) and validateIdentifier(table):
@@ -529,19 +543,20 @@ def truncate(database, table):
                 return 1
     else:
         return 1
-    
+
+
 def showCollection():
     checkData()
     dataB = showDatabases()
-    print('DataBases: ',dataB)
+    print('DataBases: ', dataB)
     for x in dataB:
         print("")
-        print("********************* [ DATABASE: "+str(x)+"] *********************")
+        print("********************* [ DATABASE: " + str(x) + "] *********************")
         dataT = showTables(x)
-        print(x,"Tables:",dataT)
+        print(x, "Tables:", dataT)
         for y in dataT:
             print("")
-            print("---------------------- [ TABLE: "+str(y)+"] ----------------------")
+            print("---------------------- [ TABLE: " + str(y) + "] ----------------------")
             dataTupla = extractTable(x, y)
             for z in dataTupla:
                 print(z)

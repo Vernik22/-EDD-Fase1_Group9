@@ -4,7 +4,7 @@
 import pickle
 import threading
 
-path = 'data/'
+path = 'data/dict/'
 
 def commit(objeto, nombre):
     try:

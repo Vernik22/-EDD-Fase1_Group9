@@ -1,7 +1,7 @@
 # License:      Released under MIT License
 # Notice:       Copyright (c) 2020 TytusDB Team
 # Developer:    Andree Avalos
-from singleton import existDB, insertDB, alterDB, dropDB, showDB, dropAll
+from storage.dict.singleton import existDB, insertDB, alterDB, dropDB, showDB, dropAll
 
 
 def createDatabase(database: str):
@@ -12,6 +12,7 @@ def createDatabase(database: str):
     except:
         return 1
 
+
 def alterDatabase(databaseOld, databaseNew):
     try:
         if not existDB(databaseOld):
@@ -21,20 +22,19 @@ def alterDatabase(databaseOld, databaseNew):
         return alterDB(databaseOld, databaseNew)
     except:
         return 1
-    
 
-def dropDatabase(database:str):
+
+def dropDatabase(database: str):
     try:
         if not existDB(database):
             return 2
         return dropDB(database)
     except:
         return 1
-    
+
 
 def showDatabases():
     try:
         return showDB()
     except:
         return 1
-    

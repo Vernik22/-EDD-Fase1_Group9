@@ -60,13 +60,14 @@ def alterDatabase(databaseOld: str, databaseNew: str) -> int:
             databases[index].name = databaseNew.lower()
             commit(databases, 'databasesISAM')
             for i in showTables(databaseNew):
-                os.rename('data/tables/' + databaseOld.lower() + i.lower() + '.bin', 'data/tables/' + databaseNew.lower() + i.lower() + '.bin')
+                os.rename('data/tables/' + databaseOld.lower() + i.lower() + '.bin',
+                          'data/tables/' + databaseNew.lower() + i.lower() + '.bin')
             return 0
     except:
         return 1
 
 
-#Elimina bases de datos
+# Elimina bases de datos
 def dropDatabase(database: str) -> int:
     checkDirs()
     try:
@@ -90,7 +91,8 @@ def dropDatabase(database: str) -> int:
     except:
         return 1
 
-#*----------------------------------tables-------------------------------------------*
+
+# *----------------------------------tables-------------------------------------------*
 
 
 # crea una instancia de Tabla y lo almacena en el listado de tablas de la base de datos
@@ -145,7 +147,7 @@ def showTables(database) -> list:
     return tableNames
 
 
-#extrae y devuelve todos los registros de una tabla
+# extrae y devuelve todos los registros de una tabla
 def extractTable(database: str, table: str):
     registers = []
     if not identifierValidation(database):
@@ -320,7 +322,8 @@ def alterTable(database, tableOld, tableNew):
             table = rollback('tables/' + database.lower() + tableOld.lower())
             table.name = tableNew.lower()
             commit(table, 'tables/' + database.lower() + tableOld.lower())
-            os.rename('data/tables/' + database.lower() + tableOld.lower() + '.bin', 'data/tables/' + database.lower() + tableNew.lower() + '.bin')
+            os.rename('data/tables/' + database.lower() + tableOld.lower() + '.bin',
+                      'data/tables/' + database.lower() + tableNew.lower() + '.bin')
             index = showDatabases().index(database.lower())
             table_index = databases[index].tables.index(tableOld.lower())
             databases[index].tables[table_index] = tableNew.lower()
@@ -329,7 +332,8 @@ def alterTable(database, tableOld, tableNew):
     except:
         return 1
 
-#Agrega una columna a una tabla
+
+# Agrega una columna a una tabla
 
 
 def alterAddColumn(database: str, table: str, default: any) -> int:
@@ -479,7 +483,7 @@ def loadCSV(file: str, database: str, table: str) -> list:
         return []
 
 
-#Metodo que muestra la informacion de un registro
+# Metodo que muestra la informacion de un registro
 def extractRow(database, table, columns):
     checkDirs()
     try:
@@ -497,7 +501,7 @@ def extractRow(database, table, columns):
         return []
 
 
-#Metodo que modifica los valores de un registro
+# Metodo que modifica los valores de un registro
 def update(database: str, table: str, register: dict, columns: list) -> int:
     try:
         dbExists = False
@@ -528,7 +532,7 @@ def update(database: str, table: str, register: dict, columns: list) -> int:
         return 1
 
 
-#Metodo que elimina un registro
+# Metodo que elimina un registro
 def delete(database, table, columns):
     try:
         dbExists = False
@@ -561,7 +565,7 @@ def delete(database, table, columns):
         return 1
 
 
-#Metodo que elimina todos los registros de una tabla
+# Metodo que elimina todos los registros de una tabla
 def truncate(database, table):
     try:
         dbExists = False
@@ -586,7 +590,8 @@ def truncate(database, table):
     except:
         return 1
 
-#*---------------------------------------others----------------------------------------------*
+
+# *---------------------------------------others----------------------------------------------*
 
 # guarda un objeto en un archivo binario
 def commit(objeto, fileName):
@@ -602,6 +607,7 @@ def rollback(fileName):
     file.close()
     return pickle.loads(b)
 
+
 # Comprueba la existencia de los directorios
 def checkDirs():
     if not os.path.exists('data'):
@@ -613,6 +619,7 @@ def checkDirs():
         commit(databases, 'databasesISAM')
     if not os.path.exists('data/ISAMMode/tables'):
         os.makedirs('data/ISAMMode/tables')
+
 
 # Comprueba que el nombre no cause conflicto
 def identifierValidation(name):
@@ -656,12 +663,13 @@ def identifierValidation(name):
         return True
 
 
-#Metodo para graficar arboles isam
+# Metodo para graficar arboles isam
 def chart(database, table):
     tab = rollback('tables/' + database + table)
     tab.chart()
 
-#Metodo para graficar las tablas de las bases de datos
+
+# Metodo para graficar las tablas de las bases de datos
 def chartList(list):
     file = open('list.dot', 'w')
     file.write('digraph list {\n')
@@ -679,9 +687,3 @@ def chartList(list):
     file.write('}')
     file.close()
     os.system("dot -Tpng list.dot -o list.png")
-
-
-
-
-    
-    

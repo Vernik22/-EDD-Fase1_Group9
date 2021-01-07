@@ -3,6 +3,8 @@
 # Copyright (c) 2020 TytusDb Team
 
 import os
+
+
 class TreeNode:
     def __init__(self, val):
         self.val = val
@@ -10,6 +12,7 @@ class TreeNode:
         self.right = None
         self.height = 1
         self.struc = None
+
 
 class AVLTree:
 
@@ -174,6 +177,7 @@ class AVLTree:
         self.preOrder(root.right, f, nodes)
 
         # List all the keys in postorder
+
     def postOrder(self, root):
         if root:
             return self.postOrder(root.left).strip() + self.postOrder(root.right).strip() + root.val + "-"

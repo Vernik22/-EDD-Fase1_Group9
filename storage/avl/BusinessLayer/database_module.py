@@ -21,7 +21,7 @@ class DatabaseModule:
         self.handler = Handler()
         self.databases = self.handler.rootinstance()
 
-    def createDatabase(self, database: str) -> int:
+    def createDatabase(self, database: strr) -> int:
         try:
             if not isinstance(database, str) or self.handler.invalid(database):
                 raise
