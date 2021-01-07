@@ -29,18 +29,18 @@ __init__()
 
 # ----------funcion unificacion de modo 1 #------------------------
 def createDatabase(database: str, mode: str, encoding: str) -> int:
-    try:
+    # try:
         if encoding not in ["utf8", "ascii", "iso-8859-1"]:
             return 4
-        if mode not in ["avl", "b", "bplus", "dict", "isam", "hash"]:
+        if mode not in ["avl", "b", "bplus", "dict", "isam", "hash","json"]:
             return 3
         db = get_database(database)
         if db is not False:  # significa que ya existe esa base de datos
             return 2
         respuesta = modoCreateDatabase(database, mode, encoding)
         return respuesta
-    except:
-        return 1
+    # except:
+    #     return 1
 
 
 def dropDatabase(database: str):
@@ -97,7 +97,7 @@ def Guardar():
 
 
 def get_database(database):
-    for db in _data:
+    for db in datos:
         if db["nombre"] == database:
             return db
 

@@ -326,7 +326,7 @@ def dropTable(database: str, table: str) -> int:
 # Registers CRUD #
 ##################
 
-# CREATE or insert a register 
+# CREATE or insert a register
 def insert(database: str, table: str, register: list) -> int:
     try:
         if not database.isidentifier() \
