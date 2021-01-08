@@ -1,3 +1,4 @@
+
 def cod_iso(cadena: str) -> str:
     try:
         return cadena.encode('iso-8859-1')
@@ -7,13 +8,21 @@ def cod_iso(cadena: str) -> str:
 
 
 
-def toASCII(cadena):
-    cadena = str(cadena)
-    resultado = 0
-    for i in cadena:
-        i = str(i)
-        resultado += ord(i)
-    return str(resultado)
-print('1')
-print(cod_iso('1'))
-print(toASCII('1'))
+def toASCII(cadena)-> str:
+    try:
+        return cadena.encode('ascii', errors='ignore')
+    except:
+        print('Error en codificacion ascci')
+        return None
+
+
+def utf(cadena: str) -> str:
+    try:
+        return cadena.encode()
+    except:
+        print("Error de codificacion ISO")
+        return None
+# print('algo no se para probar ñ')
+# print(cod_iso('algo no se para probar ñ'))
+# print(utf('algo no se para probar ñ'))
+print(toASCII('algo no se para probár'))
