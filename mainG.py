@@ -609,4 +609,6 @@ def datosTabla():
         print(cadena)
 datosTabla()
 print(alterDatabaseEncoding('Base4','iso-8859-1'))
+
+
 datosTabla()
