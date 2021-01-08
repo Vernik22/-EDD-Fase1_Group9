@@ -7,10 +7,6 @@ from CopyTable import *
 from storage.b import BMode as b
 from storage.bplus import BPlusMode as bplus
 from storage.json import jsonMode as json
-import checksum
-import crypto
-import blockchain
-import pathlib
 
 '''
 from storage.avl import avl_mode as avl
@@ -29,7 +25,6 @@ def __init__():
     global list_table
     lista_bases = []
     list_table = []
-    blokFlag = False
     if os.path.exists("Data/BasesG.bin"):
         CargarBaseBIN()
     if os.path.exists("Data/TablasG.bin"):
@@ -251,22 +246,43 @@ def dropDatabase(database: str) -> int:
 
 # CRUD DE TABLA
 
-#codificacion
-def alterDatabaseEncoding(database: str, encoding: str)-> int:
+# codificacion
+def decodificar(lista: list, anteriorEncoding: str) -> list:
+    decodificado = []
+    for i in lista:
+        # "utf8", "ascii", "iso-8859-1"
+        try:
+            if anteriorEncoding == "ascii":
+                decodificado.append(i.decode("ascii"))
+            elif anteriorEncoding == "iso-8859-1":
+                decodificado.append(i.decode("iso-8859-1"))
+            elif anteriorEncoding == "uft8":
+                decodificado.append(i.decode("utf-8"))
+        except:
+            pass
+
+    return decodificado
+
+
+def alterDatabaseEncoding(database: str, encoding: str) -> int:
     try:
         if veriEncoding:
-            if buscarbase(database):# database existe
-                for d in lista_bases: #change all databases encoding
+            if buscarbase(database):  # database existe
+                anterioEncoding = "n"
+                for d in lista_bases:  # change all databases encoding
+                    if d.base == database:
+                        if anterioEncoding == "n":
+                            anterioEncoding = d.encoding
+                        d.encoding = encoding
+                for d in list_table:  # change all tables encoding
                     if d.base == database:
                         d.encoding = encoding
-                for d in lista_table: # change all tables encoding
-                    if d.base == database:
-                        d.encoding = encoding
-                        anterior = d.codificado #actual lista
+                        anterior = d.codificado  # actual lista
                         d.codificado = []  # nueva codificacion
-                        for i in anterior: # tomo cada valor de las tuplas y lo cambio a la nueva codificacion
+                        for i in anterior:  # tomo cada valor de las tuplas y lo cambio a la nueva codificacion
+                            i = decodificar(i, anterioEncoding)
                             d.codificado.append(codTupla(i, encoding))
-                            Actualizar(list_table, "tablasG")
+                        Actualizar(list_table, "tablasG")
                 return 0
             else:
                 return 2
@@ -274,6 +290,8 @@ def alterDatabaseEncoding(database: str, encoding: str)-> int:
             return 3
     except:
         return 1
+
+
 # fin codificacion
 def createTable(database: str, table: str, numberColumns: int) -> int:
     retorno = 1000
@@ -424,9 +442,6 @@ def insert(database: str, table: str, register: list) -> int:
                         cod = returnEncoding(database)
                         d.codificado.append(codTupla(register, cod))
                         Actualizar(list_table, "tablasG")
-                        if blokFlag:
-                            blockcdata = extractTable(database, table)
-                            writeBlockChain(database, table, blockcdata)
                     return retorno
         else:
             return 3
@@ -442,7 +457,7 @@ def codTupla(registro: list, cod) -> list:
                 codificado.append(codificacion.toASCII(i))
             elif cod == "iso-8859-1":
                 codificado.append(codificacion.cod_iso(i))
-            elif cod == "uft8":
+            elif cod == "utf-8":
                 codificado.append(codificacion.utf(i))
     return codificado
 
@@ -487,9 +502,6 @@ def update(database: str, table: str, register: dict, columns: list) -> int:
                         d.data.clear()
                         for ta in extractTable(database, table):
                             ta.data.append(d)
-                        if blokFlag:
-                            blockcdata = extractTable(database, table)
-                            writeBlockChain(database, table, blockcdata)
                     return retorno
         else:
             return 3
@@ -528,74 +540,6 @@ def truncate(database: str, table: str) -> int:
             return 3
     return 2
 
-#Crypto & security functions
-
-def checksumDatabase(database: str, mode: str) -> str:
-    try:
-        e = showTables(database)
-        g = []
-        for t in e:
-            g.extend(extractTable(database, t))
-        return checksum.checksum(g, mode)
-    except:
-        return None
-
-def checksumTable(database: str, table:str, mode: str) -> str:
-    try:
-        f = extractTable(database, table)
-        return checksum.checksum(f, mode)
-    except:
-        return None
-
-def encrypt(backup: str, password: str) -> str:
-    try:
-        crypto.encrypt(backup, password)
-    except:
-        return None
-
-def decrypt(cipherBackup: str, password: str) -> str:
-    try:
-        crypto.decrypt(cipherBackup, password)
-    except:
-        return None
-
-def safeModeOn(database: str, table: str) -> int:
-    try:
-        db = showDatabases()
-        if database in db:
-            t = showTables(database)
-            if table in t:
-                if not pathlib.Path.is_file("blockchain\\" + database + "_" + table + ".json"):
-                    blokFlag = True
-                    data = extractTable(database, table)
-                    writeBlockChain(database, table, data, falg = False)
-                    return 0
-                else:
-                    return 4
-            else: return 3
-        else:
-            return 2
-    except:
-        return 1
-
-
-def safeModeOff(database: str, table: str) -> int:
-    try:
-        db = showDatabases()
-        if database in db:
-            t = showTables(database)
-            if table in t:
-                if pathlib.Path.is_file("blockchain\\" + database + "_" + table + ".json"):
-                    blokFlag = False
-                    return 0
-                else:
-                    return 4
-            else:
-                return 3
-        else:
-            return 2
-    except:
-        return 1
 
 print("----- CREAR BASE ------------")
 print(createDatabase("Base1", "bplus", "ascii"))
@@ -663,7 +607,7 @@ print(insert("Base55", "Tabla1", ['1', 'HOLA', 'MYNOR']))
 # print("----- CAMBIAR MODO  ------------")
 # print(alterDatabaseMode("Base4", "bplus"))
 # print(extractTable("Base4", "Tabla1"))
-# print(extractTable("Base4", "Tabla2"))
+print(extractTable("Base4", "Tabla2"))
 #
 # print(json.showDatabases())
 # print(bplus.showDatabases())
@@ -677,17 +621,21 @@ for d in lista_bases:
 print("=== IMPRIMO tablas== ")
 for d in list_table:
     print("\n" + str(d))
+
+
 def datosTabla():
     print("=== IMPRIMO datos de tablas== ")
     for tabla in list_table:
         print(f'Tabla: {tabla.tabla} , BD:{tabla.base}')
-        cadena ='['
+        cadena = '['
         for _ in tabla.codificado:
-            cadena += str(_) +','
+            cadena += str(_) + ','
         cadena += ']'
         print(cadena)
-datosTabla()
-print(alterDatabaseEncoding('Base4','iso-8859-1'))
 
 
 datosTabla()
+print(alterDatabaseEncoding('Base4', 'utf-8'))
+datosTabla()
+
+# dejar el ascii como "ascii" en la funcion
