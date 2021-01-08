@@ -7,6 +7,11 @@ from CopyTable import *
 from storage.b import BMode as b
 from storage.bplus import BPlusMode as bplus
 from storage.json import jsonMode as json
+import checksum
+import crypto
+import blockchain
+import pathlib
+
 
 '''
 from storage.avl import avl_mode as avl
@@ -25,6 +30,7 @@ def __init__():
     global list_table
     lista_bases = []
     list_table = []
+    blokFlag = False
     if os.path.exists("Data/BasesG.bin"):
         CargarBaseBIN()
     if os.path.exists("Data/TablasG.bin"):
@@ -442,6 +448,9 @@ def insert(database: str, table: str, register: list) -> int:
                         cod = returnEncoding(database)
                         d.codificado.append(codTupla(register, cod))
                         Actualizar(list_table, "tablasG")
+                        if blokFlag:
+                            blocdata = extractTable(database, table)
+                            writeBlockChain(database, table, data)
                     return retorno
         else:
             return 3
@@ -502,6 +511,10 @@ def update(database: str, table: str, register: dict, columns: list) -> int:
                         d.data.clear()
                         for ta in extractTable(database, table):
                             ta.data.append(d)
+                        if blokFlag:
+                            blocdata = extractTable(database, table)
+                            writeBlockChain(database, table, data)
+
                     return retorno
         else:
             return 3
@@ -539,6 +552,76 @@ def truncate(database: str, table: str) -> int:
         else:
             return 3
     return 2
+
+#crypto functions and blockchain
+def checksumDatabase(database: str, mode: str) -> str:
+    try:
+        e = showTables(database)
+        g = []
+        for t in e:
+            g.extend(extractTable(database, t))
+        return checksum.checksum(g, mode)
+    except:
+        return None
+
+def checksumTable(database: str, table:str, mode: str) -> str:
+    try:
+        f = extractTable(database, table)
+        return checksum.checksum(f, mode)
+    except:
+        return None
+
+def encrypt(backup: str, password: str) -> str:
+    try:
+        crypto.encrypt(backup, password)
+    except:
+        return None
+
+def decrypt(cipherBackup: str, password: str) -> str:
+    try:
+        crypto.decrypt(cipherBackup, password)
+    except:
+        return None
+
+def safeModeOn(database: str, table: str) -> int:
+    try:
+        db = showDatabases()
+        if database in db:
+            t = showTables(database)
+            if table in t:
+                if not pathlib.Path.is_file("blockchain\\" + database + "_" + table + ".json"):
+                    blokFlag = True
+                    data = extractTable(database, table)
+                    writeBlockChain(database, table, data, falg = False)
+                    return 0
+                else:
+                    return 4
+            else: return 3
+        else:
+            return 2
+    except:
+        return 1
+
+
+def safeModeOff(database: str, table: str) -> int:
+    try:
+        db = showDatabases()
+        if database in db:
+            t = showTables(database)
+            if table in t:
+                if pathlib.Path.is_file("blockchain\\" + database + "_" + table + ".json"):
+                    blokFlag = False
+                    return 0
+                else:
+                    return 4
+            else:
+                return 3
+        else:
+            return 2
+    except:
+        return 1
+
+
 
 
 print("----- CREAR BASE ------------")
