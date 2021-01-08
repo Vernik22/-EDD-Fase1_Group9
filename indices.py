@@ -26,7 +26,7 @@ def write():
     with open("Data/Indices.bin","bw") as w:
         pickle.dump(Indices, w )
 
-def alterTableAddFK(self, database: str, table: str, indexName: str, columns: list,  tableRef: str, columnsRef: list, modo) -> int:
+def alterTableAddFK(database, table, indexName, columns,  tableRef, columnsRef, modo):
     try:
         lc=len(columns)
         lcr=len(columnsRef)
@@ -46,7 +46,7 @@ def alterTableAddFK(self, database: str, table: str, indexName: str, columns: li
         return 1
 
 
-def alterTableDropFK(self, database: str, table: str, indexName: str, modo) -> int:
+def alterTableDropFK(database, table, indexName, modo):
     try:
         if indexName in Indices:
             #si existe el index
@@ -60,7 +60,7 @@ def alterTableDropFK(self, database: str, table: str, indexName: str, modo) -> i
     except:
         return 1
 
-def alterTableAddUnique(self,database: str, table: str, indexName: str, columns: list, modo) -> int:
+def alterTableAddUnique(database, table, indexName, columns, modo):
     try:
         lc=len(columns)
         lcr=len(columnsRef)
@@ -83,7 +83,7 @@ def alterTableAddUnique(self,database: str, table: str, indexName: str, columns:
     except:
         return 1
 
-def alterTableDropUnique(self,database: str, table: str, indexName: str, modo) -> int:
+def alterTableDropUnique(database, table, indexName, modo):
     try:
         if indexName in Indices:
             #nombre de indice si existe
@@ -97,7 +97,7 @@ def alterTableDropUnique(self,database: str, table: str, indexName: str, modo) -
     except:
         return 1
 
-def alterTableAddIndex(self,database: str, table: str, indexName: str, columns: list, modo) -> int:
+def alterTableAddIndex(database, table, indexName, columns, modo):
     try:
         lc=len(columns)
         lcr=len(columnsRef)
@@ -116,7 +116,7 @@ def alterTableAddIndex(self,database: str, table: str, indexName: str, columns: 
     except:
         return 1
 
-def alterTableDropIndex(self,database: str, table: str, indexName: str, modo) -> int:
+def alterTableDropIndex(database, table, indexName, modo):
     try:
         if indexName in Indices:
             #index si existe 
