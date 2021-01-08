@@ -13,7 +13,7 @@ def toASCII(cadena):
     for i in cadena:
         i = str(i)
         resultado += ord(i)
-    return resultado
-print('pythön en español')
-print(cod_iso('pythön en español'))
-print(toASCII('pythön en español'))
+    return str(resultado)
+print('1')
+print(cod_iso('1'))
+print(toASCII('1'))

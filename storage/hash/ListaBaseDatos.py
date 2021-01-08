@@ -20,7 +20,6 @@ class ListaBaseDatos:
     def Buscar(self, database):
 
         for base_datos in self.lista_bases_datos:
-
             if base_datos.Name.casefold() == database.casefold():
                 return base_datos
 

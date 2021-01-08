@@ -2,14 +2,16 @@
 
 
 import re
-from team16 import avlMode as avl
-from team17 import BMode as b
-from team18 import BPlusMode as bplus
+from storage.b import BMode as b
+from storage.hash import HashMode as thash
+from storage.isam import ISAMMode as isam
+from storage.bplus import BPlusMode as bplus
+from storage.avl import avlMode as avl
+from storage.json import jsonMode as json
+from storage.dict import DictMode as mdict
+
 from CopyTable import *
-#from DictMode import DictMode  as mdict
-#from team15.storage import HashMode as thash
-#from team14 import ISAMMode as isam
-from storageManager import jsonMode as json 
+
 '''
 from storage.avl import avl_mode as avl
 from storage.b import b_mode as b
