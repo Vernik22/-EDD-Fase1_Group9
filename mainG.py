@@ -12,7 +12,7 @@ import crypto
 import blockchain
 import indices
 import pathlib
-
+import zlib
 
 '''
 from storage.avl import avl_mode as avl
@@ -312,6 +312,156 @@ def createTable(database: str, table: str, numberColumns: int) -> int:
             return retorno
     else:
         return 2
+
+
+def RetornaTablasdeBase(base):
+    arreglo = []
+    for d in list_table:
+        if d.base == base:
+            arreglo.append(d.codificado)
+    return arreglo
+
+def RetornaTuplas(base,tabla):
+    for d in list_table:
+        if d.base == base and d.tabla == tabla:
+            return d.codificado
+
+def comprimidoTabla(base, tabla):
+    for d in list_table:
+        if d.base == base and d.tabla == tabla:
+            if d.compress == True:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+def comprimidoBase(base):
+    for d in lista_bases:
+        if d.base == base:
+            if d.compress == True:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+def alterDatabaseCompress(database: str, level: int) -> int:
+        if (-1 <= level or level > 9):
+            if (buscarbase(database)):
+                try:
+                    if (comprimidoBase(database)):
+                        print("La base de datos ya ha sido comprimida")
+                        return 3  # Base de datos ya comprimida
+                    else:
+                        for d in lista_bases:
+                            if d.base == database:
+                                d.compreso = True
+                                Actualizar(lista_bases, "basesG")
+                            ''
+                        for d in list_table:
+                            if d.base == database:
+                                arregloTupla = d.codificado
+                                d.codificado = []
+                                for i in arregloTupla:
+                                    if isinstance(i, str):
+                                        NuevoValor = zlib.compress(i, level)
+                                        d.codificado.append(NuevoValor)
+                                        d.compreso = True
+                        Actualizar(list_table, "tablasG")
+
+                        return 0  # operación exitosa
+                except:
+                    print("Error en la compresion de la base de datos")
+                    return 1  # Error en la operación
+            else:
+                return 2  # Database no existe
+        else:
+            return 4  # level incorrecto
+
+
+def alterDatabaseDecompress(database: str) -> int:
+    if (buscarbase(database)):
+        if (comprimidoBase(database)):
+
+            try:
+                for d in lista_bases:
+                    if d.base == database:
+                        d.compreso = False
+                        Actualizar(lista_bases, "basesG")
+
+                for d in list_table:
+                    if d.base == database:
+                        arregloTupla = d.codificado
+                        d.codificado = []
+                        for i in arregloTupla:
+                            if isinstance(i, str):
+                                NuevoValor = zlib.decompress(i)
+                                d.codificado.append(NuevoValor)
+                                d.compreso = False
+                Actualizar(list_table, "tablasG")
+                return 0  # operación exitosa
+            except:
+                print("Error en la descompresion de la base de datos")
+                return 1  # Error en la operación
+        else:
+            return 3  # Sin compresion
+    else:
+        return 2  # Database no existe
+
+def alterTableDecompress(database: str, table: str) -> int:
+    if (comprimidoTabla(database, table)):
+        if (buscarbase(database)):
+            if (buscartabla(table)):
+                try:
+                    for d in list_table:
+                        if d.base == database and d.tabla==table:
+                            arregloTupla = d.codificado
+                            d.codificado = []
+                            for i in arregloTupla:
+                                if isinstance(i, str):
+                                    NuevoValor = zlib.decompress(i)
+                                    d.codificado.append(NuevoValor)
+                                    d.compreso = False
+                    Actualizar(list_table, "tablasG")
+                    return 0  # operación exitosa
+                except:
+                    return 1  # Error en la operación
+            else:
+                return 4  # Table no existe
+        else:
+            return 2  # Database no existe
+    else:
+        return 3  # Sin compresion
+
+def alterTableCompress(database: str, table: str, level: int) -> int:
+    if (-1 <= level or level>9):
+        if(comprimidoTabla(database, table)):
+            return 5  # tabla ya comprimida
+        else:
+            if (buscarbase(database)):
+                if(buscartabla(table)):
+                    try:
+                        for d in list_table:
+                            if d.base == database and d.tabla == table:
+                                arregloTupla = d.codificado
+                                d.codificado = []
+                                for i in arregloTupla:
+                                    if isinstance(i, str):
+                                        NuevoValor = zlib.compress(i, level)
+                                        d.codificado.append(NuevoValor)
+                                        d.compreso = True
+                        Actualizar(list_table, "tablasG")
+                        return 0  # operación exitosa
+                    except:
+                        print("Error en la compresion de la tabla")
+                        return 1  # Error en la operación
+                else:
+                    return 3 #Table no existe
+            else:
+                return 2  # Database no existe
+    else:
+        return 4  # level incorrecto
 
 
 def showTables(database: str) -> list:
