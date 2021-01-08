@@ -246,7 +246,30 @@ def dropDatabase(database: str) -> int:
 
 # CRUD DE TABLA
 
-
+#codificacion
+def alterDatabaseEncoding(database: str, encoding: str)-> int:
+    try:
+        if veriEncoding:
+            if buscarbase(database):# database existe
+                for d in lista_bases: #change all databases encoding
+                    if d.base == database:
+                        d.encoding = encoding
+                for d in lista_table: # change all tables encoding
+                    if d.base == database:
+                        d.encoding = encoding
+                        anterior = d.codificado #actual lista
+                        d.codificado = []  # nueva codificacion
+                        for i in anterior: # tomo cada valor de las tuplas y lo cambio a la nueva codificacion
+                            d.codificado.append(codTupla(i, encoding))
+                            Actualizar(list_table, "tablasG")
+                return 0
+            else:
+                return 2
+        else:
+            return 3
+    except:
+        return 1
+# fin codificacion
 def createTable(database: str, table: str, numberColumns: int) -> int:
     retorno = 1000
     for d in lista_bases:
@@ -551,22 +574,22 @@ print(insert("Base4", "Tabla2", ['1', 'HOLA', 'MYNOR']))
 print(insert("Base4", "Tabla2", ['12', 'MYNOR', 'SABAN']))
 print(insert("Base55", "Tabla1", ['1', 'HOLA', 'MYNOR']))
 
-print("----- IMPRIME DATOS DE TABLAS ----------")
-print(extractTable("Base4", "Tabla1"))
-print(extractTable("Base4", "Tabla2"))
-print(extractTable("Base4", "Tabla3"))
-print(extractTable("Base1", "Tabla4"))
-print(extractTable("Base55", "Tabla1"))
-
-print("----- CAMBIAR MODO  ------------")
-print(alterDatabaseMode("Base4", "bplus"))
-print(extractTable("Base4", "Tabla1"))
-print(extractTable("Base4", "Tabla2"))
-
-print(json.showDatabases())
-print(bplus.showDatabases())
-print(bplus.extractTable("Base4", "Tabla1"))
-print(bplus.extractTable("Base4", "Tabla2"))
+# print("----- IMPRIME DATOS DE TABLAS ----------")
+# print(extractTable("Base4", "Tabla1"))
+# print(extractTable("Base4", "Tabla2"))
+# print(extractTable("Base4", "Tabla3"))
+# print(extractTable("Base1", "Tabla4"))
+# print(extractTable("Base55", "Tabla1"))
+#
+# print("----- CAMBIAR MODO  ------------")
+# print(alterDatabaseMode("Base4", "bplus"))
+# print(extractTable("Base4", "Tabla1"))
+# print(extractTable("Base4", "Tabla2"))
+#
+# print(json.showDatabases())
+# print(bplus.showDatabases())
+# print(bplus.extractTable("Base4", "Tabla1"))
+# print(bplus.extractTable("Base4", "Tabla2"))
 
 print("===IMPRIMO BASES==")
 for d in lista_bases:
@@ -575,12 +598,15 @@ for d in lista_bases:
 print("=== IMPRIMO tablas== ")
 for d in list_table:
     print("\n" + str(d))
-
-print("=== IMPRIMO datos de tablas== ")
-for tabla in list_table:
-    print(f'Tabla: {tabla.tabla} , BD:{tabla.base}')
-    cadena ='['
-    for _ in tabla.codificado:
-        cadena += str(_) +','
-    cadena += ']'
-    print(cadena)
+def datosTabla():
+    print("=== IMPRIMO datos de tablas== ")
+    for tabla in list_table:
+        print(f'Tabla: {tabla.tabla} , BD:{tabla.base}')
+        cadena ='['
+        for _ in tabla.codificado:
+            cadena += str(_) +','
+        cadena += ']'
+        print(cadena)
+datosTabla()
+print(alterDatabaseEncoding('Base4','iso-8859-1'))
+datosTabla()
