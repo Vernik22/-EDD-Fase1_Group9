@@ -888,6 +888,13 @@ def alterTableDropIndex(database: str, table: str, indexName: str) -> int:
     except:
         return 1
 
+#Grafos
+def graphDSD(database: str) -> str:
+    try:
+        return indices.graphDSD(database)
+    except:
+        return None
+
 
 print("----- CREAR BASE ------------")
 print(createDatabase("Base1", "bplus", "ascii"))

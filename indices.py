@@ -1,5 +1,7 @@
 from storage import principal as p
+import os
 import pickle
+from PIL import Image
 
 class Fks:
     def __init__(self,db,tab,index,columns,tableRef,columnRef,ind):
@@ -15,12 +17,12 @@ def __init__():
     global Indices
     Indices = {}
     if os.path.exists("Data/Indices.bin"):
-        CargarIndicesBIN()
+        Indices = CargarIndicesBIN()
 
 def CargarIndicesBIN():
     with open("Data/Indices.bin", "rb") as r:
         content = pickle.load( r)
-    return Indices = content
+    return content
 
 def write():
     with open("Data/Indices.bin","bw") as w:
@@ -70,7 +72,7 @@ def alterTableAddUnique(database, table, indexName, columns, modo):
                 #restriccion de unicidad
                 j = p.actualMod(modo).extractTable(database, table) 
                 co=len(j[0])
-                Indices[indexName]= Fks(database, table,indexName,columns,tableRef=None,columnsRef=None,co+1)
+                Indices[indexName]= Fks(database, table,indexName,columns,None,None,co+1)
                 p.actualMod(modo).alterAddColumn(database,table,indexName)
                 p.actualMod(modo).createTable(database, indexName, 2)
                 p.actualMod(modo).insert(database,indexName,[table,columns])
@@ -105,7 +107,7 @@ def alterTableAddIndex(database, table, indexName, columns, modo):
             #cantidad exacta entre columns y columnsRef
             j = p.actualMod(modo).extractTable(database, table) 
             co=len(j[0])
-            Indices[indexName]= Fks(database, table,indexName,columns,tableRef=None,columnsRef=None,co+1)
+            Indices[indexName]= Fks(database, table,indexName,columns,None,None,co+1)
             p.actualMod(modo).alterAddColumn(database,table,indexName)
             p.actualMod(modo).createTable(database, indexName, 2)
             p.actualMod(modo).insert(database,indexName,[table,columns])
@@ -129,3 +131,26 @@ def alterTableDropIndex(database, table, indexName, modo):
             return 4
     except:
         return 1
+
+
+def graphDSD(database):
+    try:
+        texto = ''''''
+        texto += '''digraph G {
+            graph [ordering="out"];\n randkdir=TB;\nnode [shape=square];'''
+        for d in Indices:
+            if d.db == database:
+                if not d.tableRef == None:
+                    texto+= str(d.table)+'''->'''+str(d.tableRef)+''';\n'''
+        texto += '''\n}'''
+        g=open("graphDSD.dot","w")
+        g.write(texto)
+        g.close()
+        os.system('dot -Tpng graphDSD.dot -o graphDSD.png')
+        os.system('graphDSD.png')
+        img=Image.open("graphDSD.png")
+        img.show()
+        return texto
+    except:
+        return None
+    
