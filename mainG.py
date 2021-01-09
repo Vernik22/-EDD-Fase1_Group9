@@ -25,13 +25,12 @@ from storage.json import json_mode as json
 '''
 import os, pickle, csv
 
-
+blokFlag = False
 def __init__():
     global lista_bases
     global list_table
     lista_bases = []
     list_table = []
-    blokFlag = False
     if os.path.exists("Data/BasesG.bin"):
         CargarBaseBIN()
     if os.path.exists("Data/TablasG.bin"):
@@ -601,7 +600,7 @@ def insert(database: str, table: str, register: list) -> int:
                         Actualizar(list_table, "tablasG")
                         if blokFlag:
                             blocdata = extractTable(database, table)
-                            writeBlockChain(database, table, data)
+                            blockchain.writeBlockChain(database, table, data)
                     return retorno
         else:
             return 3
@@ -784,7 +783,10 @@ def alterTableAddFK(database: str, table: str, indexName: str, columns: list,  t
                 if buscartabla(database, tableRef):
                     for d in list_table:
                         if d.base == database and d.tabla == table:
-                            retorno = indices.alterTableAddFK(database,table,indexName,columns,tableRef,columnsRef,d.mode)
+                            j = extractTable(database, table) 
+                            co=len(j[0])
+                            mo = d.modo
+                            retorno = indices.alterTableAddFK(database,table,indexName,columns,tableRef,columnsRef,mo,co)
                             if retorno == 0:
                                 Actualizar(list_table, "tablasG")
                             return retorno
@@ -823,7 +825,10 @@ def alterTableAddUnique(database: str, table: str, indexName: str, columns: list
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableAddUnique(database,table,indexName,columns,d.mode)
+                        j = extractTable(database, table) 
+                        co=len(j[0])
+                        mo = d.modo
+                        retorno = indices.alterTableAddUnique(database,table,indexName,columns,d.mode,co)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -859,7 +864,10 @@ def alterTableAddIndex(database: str, table: str, indexName: str, columns: list)
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableAddIndex(database,table,indexName,columns,d.mode)
+                        j = extractTable(database, table) 
+                        co=len(j[0])
+                        mo = d.modo
+                        retorno = indices.alterTableAddIndex(database,table,indexName,columns,d.mode,co)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -935,6 +943,7 @@ print(alterAddPK("Base4", "Tabla1", [0]))
 print(alterAddPK("Base4", "Tabla2", [0]))
 print(alterAddPK("Base4", "Tabla3", [0]))
 print(alterAddPK("Base5", "Tabla1", [0]))
+print(alterTableAddFK("Base4","Tabla2","byron",[0],"Tabla3",[0]))
 
 print("----- QUITA PK ----------")
 print(alterDropPK("Base55", "Tabla1"))

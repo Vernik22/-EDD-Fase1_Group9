@@ -1,4 +1,10 @@
-from storage import principal as p
+from storage.b import BMode as b
+from storage.hash import HashMode as hash
+from storage.isam import ISAMMode as isam
+from storage.bplus import BPlusMode as bplus
+from storage.avl import avlMode as avl
+from storage.json import jsonMode as json
+from storage.dict import DictMode as dict
 import os
 import pickle
 from PIL import Image
@@ -12,10 +18,9 @@ class Fks:
         self.tableRef = tableRef
         self.columnRef = columnRef
         self.colintab = ind
-
+Indices = {}
 def __init__():
     global Indices
-    Indices = {}
     if os.path.exists("Data/Indices.bin"):
         Indices = CargarIndicesBIN()
 
@@ -28,18 +33,16 @@ def write():
     with open("Data/Indices.bin","bw") as w:
         pickle.dump(Indices, w )
 
-def alterTableAddFK(database, table, indexName, columns,  tableRef, columnsRef, modo):
+def alterTableAddFK(database, table, indexName, columns,  tableRef, columnsRef, modo, co):
     try:
         lc=len(columns)
         lcr=len(columnsRef)
         if lc==lcr:
             #cantidad exacta entre culumns y columnsRef
-            j = p.actualMod(modo).extractTable(database, table) 
-            co=len(j[0])
             Indices[indexName]=Fks(database, table,indexName,columns,tableRef,columnsRef,co+1)
-            p.actualMod(modo).alterAddColumn(database,table,indexName)
-            p.actualMod(modo).createTable(database, indexName, 4)
-            p.actualMod(modo).insert(database,indexName,[table,columns,tableRef,columnsRef])
+            actualMod(modo).alterAddColumn(database,table,indexName)
+            actualMod(modo).createTable(database, indexName, 4)
+            actualMod(modo).insert(database,indexName,[table,columns,tableRef,columnsRef])
             write()
             return 0
         else:
@@ -52,8 +55,8 @@ def alterTableDropFK(database, table, indexName, modo):
     try:
         if indexName in Indices:
             #si existe el index
-            p.actualMod(modo).alterDropColumn(database, table, Indices[indexName].colintab)
-            p.actualMod(modo).dropTable(database, indexName)
+            actualMod(modo).alterDropColumn(database, table, Indices[indexName].colintab)
+            actualMod(modo).dropTable(database, indexName)
             del Indices[indexName]
             write()
             return 0
@@ -62,7 +65,7 @@ def alterTableDropFK(database, table, indexName, modo):
     except:
         return 1
 
-def alterTableAddUnique(database, table, indexName, columns, modo):
+def alterTableAddUnique(database, table, indexName, columns, modo,co):
     try:
         lc=len(columns)
         lcr=len(columnsRef)
@@ -70,12 +73,10 @@ def alterTableAddUnique(database, table, indexName, columns, modo):
             #cantidad exacta entre columns y columnsRef
             if not indexName in Indices:
                 #restriccion de unicidad
-                j = p.actualMod(modo).extractTable(database, table) 
-                co=len(j[0])
                 Indices[indexName]= Fks(database, table,indexName,columns,None,None,co+1)
-                p.actualMod(modo).alterAddColumn(database,table,indexName)
-                p.actualMod(modo).createTable(database, indexName, 2)
-                p.actualMod(modo).insert(database,indexName,[table,columns])
+                actualMod(modo).alterAddColumn(database,table,indexName)
+                actualMod(modo).createTable(database, indexName, 2)
+                actualMod(modo).insert(database,indexName,[table,columns])
                 write()
                 return 0
             else:
@@ -89,8 +90,8 @@ def alterTableDropUnique(database, table, indexName, modo):
     try:
         if indexName in Indices:
             #nombre de indice si existe
-            p.actualMod(modo).alterDropColumn(database, table, Indices[indexName].colintab)
-            p.actualMod(modo).dropTable(database, indexName)
+            actualMod(modo).alterDropColumn(database, table, Indices[indexName].colintab)
+            actualMod(modo).dropTable(database, indexName)
             del Indices[indexName]
             write()
             return 0
@@ -99,18 +100,16 @@ def alterTableDropUnique(database, table, indexName, modo):
     except:
         return 1
 
-def alterTableAddIndex(database, table, indexName, columns, modo):
+def alterTableAddIndex(database, table, indexName, columns, modo,co):
     try:
         lc=len(columns)
         lcr=len(columnsRef)
         if lc==lcr:
             #cantidad exacta entre columns y columnsRef
-            j = p.actualMod(modo).extractTable(database, table) 
-            co=len(j[0])
             Indices[indexName]= Fks(database, table,indexName,columns,None,None,co+1)
-            p.actualMod(modo).alterAddColumn(database,table,indexName)
-            p.actualMod(modo).createTable(database, indexName, 2)
-            p.actualMod(modo).insert(database,indexName,[table,columns])
+            actualMod(modo).alterAddColumn(database,table,indexName)
+            actualMod(modo).createTable(database, indexName, 2)
+            actualMod(modo).insert(database,indexName,[table,columns])
             write()
             return 0
         else:
@@ -122,8 +121,8 @@ def alterTableDropIndex(database, table, indexName, modo):
     try:
         if indexName in Indices:
             #index si existe 
-            p.actualMod(modo).alterDropColumn(database, table, Indices[indexName].colintab)
-            p.actualMod(modo).dropTable(database, indexName)
+            actualMod(modo).alterDropColumn(database, table, Indices[indexName].colintab)
+            actualMod(modo).dropTable(database, indexName)
             del Indices[indexName]
             write()
             return 0
@@ -141,7 +140,7 @@ def graphDSD(database):
         for d in Indices:
             if d.db == database:
                 if not d.tableRef == None:
-                    texto+= str(d.table)+'''->'''+str(d.tableRef)+''';\n'''
+                    texto+= str(d.table)+''' -> '''+str(d.tableRef)+''';\n'''
         texto += '''\n}'''
         g=open("graphDSD.dot","w")
         g.write(texto)
@@ -154,3 +153,18 @@ def graphDSD(database):
     except:
         return None
     
+def actualMod(mode):
+    if mode == "avl":
+        return avl
+    elif mode == "b":
+        return b
+    elif mode == "bplus":
+        return bplus
+    elif mode == "dict":
+        return dict
+    elif mode == "isam":
+        return isam
+    elif mode == "json":
+        return json
+    elif mode == "hash":
+        return hash
