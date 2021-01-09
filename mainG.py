@@ -740,10 +740,10 @@ def safeModeOn(database: str, table: str) -> int:
         if database in db:
             t = showTables(database)
             if table in t:
-                if not pathlib.Path.is_file("blockchain\\" + database + "_" + table + ".json"):
+                if not pathlib.Path("blockchain/" + db + "_" + table + ".json").is_file():
                     blokFlag = True
                     data = extractTable(database, table)
-                    writeBlockChain(database, table, data, falg = False)
+                    blockchain.writeBlockChain(database, table, data, falg = False)
                     return 0
                 else:
                     return 4
@@ -760,8 +760,10 @@ def safeModeOff(database: str, table: str) -> int:
         if database in db:
             t = showTables(database)
             if table in t:
-                if pathlib.Path.is_file("blockchain\\" + database + "_" + table + ".json"):
+                if pathlib.Path("blockchain/" + db + "_" + table + ".json").is_file():
                     blokFlag = False
+                    data = extractTable(database, table)
+                    blockchain.showBlockChain(database, table, data)
                     return 0
                 else:
                     return 4
