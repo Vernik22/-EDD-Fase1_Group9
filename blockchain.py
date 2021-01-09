@@ -1,11 +1,13 @@
 import json
-import hahslib
+import hashlib
 import os
+import pathlib
+from graphviz import Digraph
 
 def writeBlockChain(db, table, data, falg = True):
     """escribe el blockchain"""
     initCheck()
-    if not pathlib.Path.is_file("blockchain\\" + database + "_" + table + ".json") and falg:
+    if not pathlib.Path("blockchain/" + db + "_" + table + ".json").is_file() and falg:
         return
     bchain ={}
     f = list(map(_toHash, data))
@@ -33,11 +35,22 @@ def showBlockChain(db, table, data):
     bchan = read("blockchain\\"+name+".json")
     f = list(map(_toHash, data))
     flag = True
+    imagen = Digraph(name=name, filename="blockchain\\"+name, format="png")
     for x in range(0, len(bchan["list"])):
+        actual = bchan["list"][x]
+        content = "prev: " + bchan["bchain"][actual]["prev"] + "\n actual: " + bchan["list"][x] + "\nnext: " + \
+                  bchan["bchain"][actual]["next"]
         if (f[x] == bchan["list"][x]) and flag:
-            pass
+            imagen.node(name=bchan["list"][x], label=content, shape="box", color ="blue")
+            imagen.edge(actual, bchan["bchain"][actual]["next"],arrowhead="vee")
+            imagen.edge(actual ,bchan["bchain"][actual]["prev"],arrowhead = "vee")
+
         else:
             flag = False
+            imagen.node(name=bchan["list"][x], label=content, shape="box", color="crimson")
+            imagen.edge(actual, bchan["bchain"][actual]["next"], arrowhead="vee")
+            imagen.edge(actual, bchan["bchain"][actual]["prev"], arrowhead="vee")
+    imagen.render(view=True)
 
 
 def initCheck():
@@ -70,3 +83,7 @@ def _toHash(data):
     for x in data:
         l = l + str(x)
     return md(l.encode())
+
+writeBlockChain("1", "1", [["taco", 1], ["piña", 2], ["soplos", 3]], False)
+
+showBlockChain("1", "1", [["taco", 1], ["piñas", 22], ["soplos", 3]])
