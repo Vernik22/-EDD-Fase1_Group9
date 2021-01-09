@@ -1,7 +1,7 @@
 from storage import principal as p
 import os
 import pickle
-from PIL import Image
+# from PIL import Image
 
 class Fks:
     def __init__(self,db,tab,index,columns,tableRef,columnRef,ind):
@@ -19,13 +19,16 @@ def __init__():
     if os.path.exists("Data/Indices.bin"):
         Indices = CargarIndicesBIN()
 
+
 def CargarIndicesBIN():
+    # f = open('./data/avlMode/root.dat', 'wb')
+    # f.close()
     with open("Data/Indices.bin", "rb") as r:
         content = pickle.load( r)
     return content
 
 def write():
-    with open("Data/Indices.bin","bw") as w:
+    with open("Data/Indices.bin","wb") as w:
         pickle.dump(Indices, w )
 
 def alterTableAddFK(database, table, indexName, columns,  tableRef, columnsRef, modo):

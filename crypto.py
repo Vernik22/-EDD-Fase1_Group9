@@ -11,7 +11,7 @@ def encrypt(data, password):
 def decrypt(data, password):
     key = keygen(password)
     f = Fernet(key)
-    return str(f.decrypt(data))
+    return f.decrypt(data).decode()
 
 def keygen(password):
     kdf = PBKDF2HMAC(

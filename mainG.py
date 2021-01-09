@@ -24,14 +24,14 @@ from storage.isam import isam_mode as isam
 from storage.json import json_mode as json 
 '''
 import os, pickle, csv
-
+blokFlag = False
 
 def __init__():
     global lista_bases
     global list_table
     lista_bases = []
     list_table = []
-    blokFlag = False
+
     if os.path.exists("Data/BasesG.bin"):
         CargarBaseBIN()
     if os.path.exists("Data/TablasG.bin"):
@@ -290,6 +290,7 @@ def alterDatabaseEncoding(database: str, encoding: str) -> int:
                             i = decodificar(i, anterioEncoding)
                             d.codificado.append(codTupla(i, encoding))
                         Actualizar(list_table, "tablasG")
+                        Actualizar(lista_bases, "BasesG")
                 return 0
             else:
                 return 2
@@ -321,75 +322,71 @@ def RetornaTablasdeBase(base):
             arreglo.append(d.codificado)
     return arreglo
 
-def RetornaTuplas(base,tabla):
+
+def RetornaTuplas(base, tabla):
     for d in list_table:
         if d.base == base and d.tabla == tabla:
             return d.codificado
 
+
 def comprimidoTabla(base, tabla):
     for d in list_table:
         if d.base == base and d.tabla == tabla:
-            if d.compress == True:
+            if d.compreso:
                 return True
-            else:
-                return False
-        else:
-            return False
+    return False
+
 
 def comprimidoBase(base):
     for d in lista_bases:
         if d.base == base:
-            if d.compress == True:
+            if d.compreso:
                 return True
-            else:
-                return False
-        else:
-            return False
+    return False
+
 
 def alterDatabaseCompress(database: str, level: int) -> int:
-        if (-1 <= level or level > 9):
-            if (buscarbase(database)):
-                try:
-                    if (comprimidoBase(database)):
-                        print("La base de datos ya ha sido comprimida")
-                        return 3  # Base de datos ya comprimida
-                    else:
-                        for d in lista_bases:
-                            if d.base == database:
-                                d.compreso = True
-                                Actualizar(lista_bases, "basesG")
-                            ''
-                        for d in list_table:
-                            if d.base == database:
-                                arregloTupla = d.codificado
-                                d.codificado = []
-                                for i in arregloTupla:
-                                    if isinstance(i, str):
-                                        NuevoValor = zlib.compress(i, level)
-                                        d.codificado.append(NuevoValor)
-                                        d.compreso = True
-                        Actualizar(list_table, "tablasG")
+    if (-1 <= level or level > 9):
+        if (buscarbase(database)):
+            try:
+                if (comprimidoBase(database)):
+                    print("La base de datos ya ha sido comprimida")
+                    return 3  # Base de datos ya comprimida
+                else:
+                    for d in lista_bases:
+                        if d.base == database:
+                            d.compreso = True
 
-                        return 0  # operación exitosa
-                except:
-                    print("Error en la compresion de la base de datos")
-                    return 1  # Error en la operación
-            else:
-                return 2  # Database no existe
+                    Actualizar(lista_bases, "basesG")
+                    for d in list_table:
+                        if d.base == database:
+                            arregloTupla = d.codificado
+                            d.codificado = []
+                            for i in arregloTupla:
+                                if isinstance(i, str):
+                                    NuevoValor = zlib.compress(i, level)
+                                    d.codificado.append(NuevoValor)
+                            d.compreso = True
+                    Actualizar(list_table, "tablasG")
+
+                    return 0  # operación exitosa
+            except:
+                print("Error en la compresion de la base de datos")
+                return 1  # Error en la operación
         else:
-            return 4  # level incorrecto
+            return 2  # Database no existe
+    else:
+        return 4  # level incorrecto
 
 
 def alterDatabaseDecompress(database: str) -> int:
     if (buscarbase(database)):
         if (comprimidoBase(database)):
-
             try:
                 for d in lista_bases:
                     if d.base == database:
                         d.compreso = False
                         Actualizar(lista_bases, "basesG")
-
                 for d in list_table:
                     if d.base == database:
                         arregloTupla = d.codificado
@@ -398,7 +395,7 @@ def alterDatabaseDecompress(database: str) -> int:
                             if isinstance(i, str):
                                 NuevoValor = zlib.decompress(i)
                                 d.codificado.append(NuevoValor)
-                                d.compreso = False
+                        d.compreso = False
                 Actualizar(list_table, "tablasG")
                 return 0  # operación exitosa
             except:
@@ -409,20 +406,21 @@ def alterDatabaseDecompress(database: str) -> int:
     else:
         return 2  # Database no existe
 
+
 def alterTableDecompress(database: str, table: str) -> int:
     if (comprimidoTabla(database, table)):
         if (buscarbase(database)):
-            if (buscartabla(table)):
+            if (buscartabla(database, table)):
                 try:
                     for d in list_table:
-                        if d.base == database and d.tabla==table:
+                        if d.base == database and d.tabla == table:
                             arregloTupla = d.codificado
                             d.codificado = []
                             for i in arregloTupla:
                                 if isinstance(i, str):
                                     NuevoValor = zlib.decompress(i)
                                     d.codificado.append(NuevoValor)
-                                    d.compreso = False
+                            d.compreso = False
                     Actualizar(list_table, "tablasG")
                     return 0  # operación exitosa
                 except:
@@ -434,13 +432,14 @@ def alterTableDecompress(database: str, table: str) -> int:
     else:
         return 3  # Sin compresion
 
+
 def alterTableCompress(database: str, table: str, level: int) -> int:
-    if (-1 <= level or level>9):
-        if(comprimidoTabla(database, table)):
+    if (-1 <= level or level > 9):
+        if (comprimidoTabla(database, table)):
             return 5  # tabla ya comprimida
         else:
             if (buscarbase(database)):
-                if(buscartabla(table)):
+                if (buscartabla(database, table)):
                     try:
                         for d in list_table:
                             if d.base == database and d.tabla == table:
@@ -450,14 +449,14 @@ def alterTableCompress(database: str, table: str, level: int) -> int:
                                     if isinstance(i, str):
                                         NuevoValor = zlib.compress(i, level)
                                         d.codificado.append(NuevoValor)
-                                        d.compreso = True
+                                d.compreso = True
                         Actualizar(list_table, "tablasG")
                         return 0  # operación exitosa
                     except:
                         print("Error en la compresion de la tabla")
                         return 1  # Error en la operación
                 else:
-                    return 3 #Table no existe
+                    return 3  # Table no existe
             else:
                 return 2  # Database no existe
     else:
@@ -601,7 +600,7 @@ def insert(database: str, table: str, register: list) -> int:
                         Actualizar(list_table, "tablasG")
                         if blokFlag:
                             blocdata = extractTable(database, table)
-                            writeBlockChain(database, table, data)
+                            blockchain.writeBlockChain(database, table, data)
                     return retorno
         else:
             return 3
@@ -704,7 +703,8 @@ def truncate(database: str, table: str) -> int:
             return 3
     return 2
 
-#crypto functions and blockchain
+
+# crypto functions and blockchain
 def checksumDatabase(database: str, mode: str) -> str:
     try:
         e = showTables(database)
@@ -715,24 +715,28 @@ def checksumDatabase(database: str, mode: str) -> str:
     except:
         return None
 
-def checksumTable(database: str, table:str, mode: str) -> str:
+
+def checksumTable(database: str, table: str, mode: str) -> str:
     try:
         f = extractTable(database, table)
         return checksum.checksum(f, mode)
     except:
         return None
 
+
 def encrypt(backup: str, password: str) -> str:
     try:
-        crypto.encrypt(backup, password)
+        return crypto.encrypt(backup, password)
     except:
         return None
 
+
 def decrypt(cipherBackup: str, password: str) -> str:
     try:
-        crypto.decrypt(cipherBackup, password)
+        return crypto.decrypt(cipherBackup, password)
     except:
         return None
+
 
 def safeModeOn(database: str, table: str) -> int:
     try:
@@ -743,11 +747,12 @@ def safeModeOn(database: str, table: str) -> int:
                 if not pathlib.Path("blockchain/" + db + "_" + table + ".json").is_file():
                     blokFlag = True
                     data = extractTable(database, table)
-                    blockchain.writeBlockChain(database, table, data, falg = False)
+                    blockchain.writeBlockChain(database, table, data, falg=False)
                     return 0
                 else:
                     return 4
-            else: return 3
+            else:
+                return 3
         else:
             return 2
     except:
@@ -774,17 +779,19 @@ def safeModeOff(database: str, table: str) -> int:
     except:
         return 1
 
-#Indices 
 
-def alterTableAddFK(database: str, table: str, indexName: str, columns: list,  tableRef: str, columnsRef: list) -> int:
+# Indices
+
+def alterTableAddFK(database: str, table: str, indexName: str, columns: list, tableRef: str, columnsRef: list) -> int:
     try:
         db = showDatabases()
-        if database in db:   
+        if database in db:
             if buscartabla(database, table):
                 if buscartabla(database, tableRef):
                     for d in list_table:
                         if d.base == database and d.tabla == table:
-                            retorno = indices.alterTableAddFK(database,table,indexName,columns,tableRef,columnsRef,d.mode)
+                            retorno = indices.alterTableAddFK(database, table, indexName, columns, tableRef, columnsRef,
+                                                              d.mode)
                             if retorno == 0:
                                 Actualizar(list_table, "tablasG")
                             return retorno
@@ -801,11 +808,11 @@ def alterTableAddFK(database: str, table: str, indexName: str, columns: list,  t
 def alterTableDropFK(database: str, table: str, indexName: str) -> int:
     try:
         db = showDatabases()
-        if database in db:   
+        if database in db:
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableDropFK(database,table,indexName,d.mode)
+                        retorno = indices.alterTableDropFK(database, table, indexName, d.mode)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -815,15 +822,16 @@ def alterTableDropFK(database: str, table: str, indexName: str) -> int:
             return 2
     except:
         return 1
+
 
 def alterTableAddUnique(database: str, table: str, indexName: str, columns: list) -> int:
     try:
         db = showDatabases()
-        if database in db:   
+        if database in db:
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableAddUnique(database,table,indexName,columns,d.mode)
+                        retorno = indices.alterTableAddUnique(database, table, indexName, columns, d.mode)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -833,15 +841,16 @@ def alterTableAddUnique(database: str, table: str, indexName: str, columns: list
             return 2
     except:
         return 1
+
 
 def alterTableDropUnique(database: str, table: str, indexName: str) -> int:
     try:
         db = showDatabases()
-        if database in db:   
+        if database in db:
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableDropUnique(database,table,indexName,d.mode)
+                        retorno = indices.alterTableDropUnique(database, table, indexName, d.mode)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -851,15 +860,16 @@ def alterTableDropUnique(database: str, table: str, indexName: str) -> int:
             return 2
     except:
         return 1
+
 
 def alterTableAddIndex(database: str, table: str, indexName: str, columns: list) -> int:
     try:
         db = showDatabases()
-        if database in db:   
+        if database in db:
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableAddIndex(database,table,indexName,columns,d.mode)
+                        retorno = indices.alterTableAddIndex(database, table, indexName, columns, d.mode)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -869,15 +879,16 @@ def alterTableAddIndex(database: str, table: str, indexName: str, columns: list)
             return 2
     except:
         return 1
+
 
 def alterTableDropIndex(database: str, table: str, indexName: str) -> int:
     try:
         db = showDatabases()
-        if database in db:   
+        if database in db:
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableDropIndex(database,table,indexName,d.mode)
+                        retorno = indices.alterTableDropIndex(database, table, indexName, d.mode)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -888,7 +899,8 @@ def alterTableDropIndex(database: str, table: str, indexName: str) -> int:
     except:
         return 1
 
-#Grafos
+
+# Grafos
 def graphDSD(database: str) -> str:
     try:
         return indices.graphDSD(database)
@@ -935,6 +947,7 @@ print(alterAddPK("Base4", "Tabla1", [0]))
 print(alterAddPK("Base4", "Tabla2", [0]))
 print(alterAddPK("Base4", "Tabla3", [0]))
 print(alterAddPK("Base5", "Tabla1", [0]))
+print(alterTableAddFK("Base4","Tabla2","byron",["0"],"Tabla3",["1"]))
 
 print("----- QUITA PK ----------")
 print(alterDropPK("Base55", "Tabla1"))
@@ -992,5 +1005,22 @@ def datosTabla():
 datosTabla()
 print(alterDatabaseEncoding('Base4', 'utf-8'))
 datosTabla()
+print(alterDatabaseCompress("Base4", 5))
+print(alterDatabaseCompress("Base55", -2))
 
+print(alterDatabaseDecompress("Base4"))
+print(alterDatabaseDecompress("Base55"))
+
+print(alterTableDecompress("Base4", "Tabla1"))
+print(alterTableDecompress("Base55", "Tabla2"))
+
+print(alterTableCompress("Base4", "Tabla1", 7))
+print(alterTableCompress("Base55", "Tabla2", 6))
+print(alterTableDecompress("Base4", "Tabla1"))
+print(alterTableDecompress("Base55", "Tabla2"))
+print(checksumDatabase("Base4","SHA256"))
+print(checksumTable("Base4","Tabla2","SHA256"))
+print(encrypt("byron","cul"))
+print(decrypt(encrypt("byron","cul"),"cul"))
 # dejar el ascii como "ascii" en la funcion
+print(graphDSD("Base4"))
