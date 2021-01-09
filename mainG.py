@@ -790,8 +790,10 @@ def alterTableAddFK(database: str, table: str, indexName: str, columns: list, ta
                 if buscartabla(database, tableRef):
                     for d in list_table:
                         if d.base == database and d.tabla == table:
-                            retorno = indices.alterTableAddFK(database, table, indexName, columns, tableRef, columnsRef,
-                                                              d.mode)
+                            j = extractTable(database, table) 
+                            co=len(j[0])
+                            mo = d.modo
+                            retorno = indices.alterTableAddFK(database, table, indexName, columns, tableRef, columnsRef,mo,co)
                             if retorno == 0:
                                 Actualizar(list_table, "tablasG")
                             return retorno
@@ -831,7 +833,10 @@ def alterTableAddUnique(database: str, table: str, indexName: str, columns: list
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableAddUnique(database, table, indexName, columns, d.mode)
+                        j = extractTable(database, table) 
+                        co=len(j[0])
+                        mo = d.modo
+                        retorno = indices.alterTableAddUnique(database, table, indexName, columns,mo,co)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
@@ -869,7 +874,10 @@ def alterTableAddIndex(database: str, table: str, indexName: str, columns: list)
             if buscartabla(database, table):
                 for d in list_table:
                     if d.base == database and d.tabla == table:
-                        retorno = indices.alterTableAddIndex(database, table, indexName, columns, d.mode)
+                        j = extractTable(database, table) 
+                        co=len(j[0])
+                        mo = d.modo
+                        retorno = indices.alterTableAddIndex(database, table, indexName, columns,mo,co)
                         if retorno == 0:
                             Actualizar(list_table, "tablasG")
                         return retorno
